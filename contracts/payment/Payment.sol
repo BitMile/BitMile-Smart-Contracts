@@ -1,9 +1,12 @@
 pragma solidity ^0.4.20;
 
+import 'zeppelin-solidity/contracts/math/SafeMath.sol';
 
 import "../deal/DealInfo.sol";
 
 contract Payment is DealInfo {
+  using SafeMath for uint256;
+
   struct UserBalance {
     uint256 escrowLock;
     uint256 escrowUnlock;
@@ -13,89 +16,80 @@ contract Payment is DealInfo {
 
   mapping(address => UserBalance) userBalances;
 
-  event LogDealPaid (
-    uint256 _dealId,
-    address _from,
-    address[] _to
-  );
-    
-  function unlockBalance(address _userId, uint256 _value) internal returns(bool) {		
-    require(userBalances[_userId].escrowLock >= _value);
+  event LogDealPaid(uint256 _dealId, address _from, address[] _to);
+
+  event LogBalanceUnlocked(address _userId, uint256 _value);
+
+  function _unlockBalance(address _userId, uint256 _value) internal returns(bool) {
+    UserBalance storage _balance = userBalances[_userId];
+
+    require(_balance.escrowLock >= _value);
     require(balanceLock == false);
-        
+
     balanceLock = true;
-    userBalances[_userId].escrowLock -= _value;
-    userBalances[_userId].escrowUnlock += _value;
+
+    _balance.escrowLock = _balance.escrowLock.sub(_value);
+    _balance.escrowUnlock = _balance.escrowUnlock.add(_value);
+
     balanceLock = false;
-        
+    emit LogBalanceUnlocked(_userId, _value);
     return true;
-  }    
-    
-  function withdraw(uint256 _value) public returns (bool) {
-    require(userBalances[msg.sender].escrowUnlock >= _value);
+  }
+
+  function withdraw(uint256 _value) external returns(bool) {
+    UserBalance storage _balance = userBalances[msg.sender];
+
+    require(_balance.escrowUnlock >= _value);
     require(balanceLock == false);
-        
+
     balanceLock = true;
-        
-    userBalances[msg.sender].escrowUnlock -= _value;
+
+    _balance.escrowUnlock = _balance.escrowUnlock.sub(_value);
     msg.sender.transfer(_value);
-        
+
     balanceLock = false;
     return true;
   }
-       
+
   function getBalance(address _userId) public view returns(
-    uint256 lockAmount,
-    uint256 unlockAmount
+    uint256 _lockAmount,
+    uint256 _unlockAmount
   ) {
     return (
       userBalances[_userId].escrowLock,
       userBalances[_userId].escrowUnlock
     );
   }
-    
+
   // send BMC from Consumer to all valid doc owners
   function payForRequestKeys(uint256 _dealId, address[] _userIds) external payable returns(bool) {
-    require (deals[_dealId].bidder == msg.sender);
-    uint256 _price = deals[_dealId].price;
-    uint256 _sendAmount = msg.value;
-        
-    require(msg.value >= _userIds.length*_price);
+    DealData storage _deal = deals[_id];
+
+    require(!hasExpired(_dealId));
+    require(_deal.bidder == msg.sender);
+
+    uint256 _price = _deal.price;
+    uint256 _amount = msg.value;
+
+    require(msg.value >= _userIds.length.mul(_price));
     require(balanceLock == false);
-        
+
     balanceLock = true;
-        
-    for (uint256 i = 0; i < _userIds.length; ++i) {
-      userBalances[_userIds[i]].escrowLock += _price;
-      _sendAmount -= _price;
+
+    for (uint256 _i = 0; _i < _userIds.length; ++_i) {
+      UserBalance storage _balance = userBalances[_userIds[_i]];
+      _balance.escrowLock = _balance.escrowLock.add(_price);
+      _amount = _amount.sub(_price);
     }
 
-    if (_sendAmount >= 0) {
-      userBalances[msg.sender].escrowUnlock += _sendAmount;
+    if (_amount >= 0) {
+      UserBalance storage _bidderBalance = userBalances[msg.sender];
+      _bidderBalance.escrowUnlock = _bidderBalance.escrowUnlock.add(_amount);
     }
-        
+
     emit LogDealPaid(_dealId, msg.sender, _userIds);
-        
+
     balanceLock = false;
     return true;
   }
-      
-  /* refund BMC to consumer (if necessary) when the deal is finished
-  function refundBMCForConsumer(uint256 _dealId, address[] _userIds) public payable returns(bool) {
-    require(deals[_dealId].bidder == msg.sender);
-    uint256 _price = deals[_dealId].price;
-    require(balanceLock == false);
-        
-    balanceLock = true;
-		
-    for (uint256 i = 0; i < _userIds.length; ++i) {
-      if (userBalances[_userIds[i]].escrowLock >= _price) {
-        userBalances[_userIds[i]].escrowLock -= _price;
-        userBalances[msg.sender].escrowUnlock += _price;
-      }
-    }
-		
-    balanceLock = false;        
-    return true;
-  }*/
 }
