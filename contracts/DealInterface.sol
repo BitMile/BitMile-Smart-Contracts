@@ -18,20 +18,14 @@ contract DealInterface is SecKeyList, Payment {
 
   function createDeal(
     uint256 _price,
-    uint256 _expiryTime,
+    uint256 _expiryTimeAfter,
     string _sessionPublicKey
   ) external {
+    require(_expiryTimeAfter > 0);
+
     uint256 _id = globalDealId;
-    DealData storage _deal = deals[_id];
-
-    require(_deal.id == 0);
-    require(_expiryTime > 0);
-
-    _deal.id = _id;
-    _deal.bidder = msg.sender;
-    _deal.price = _price;
-    _deal.expiryTime = _expiryTime.add(block.timestamp);
-    _deal.sessionPublicKey = _sessionPublicKey;
+    uint256 _expiryTime = _expiryTimeAfter.add(block.timestamp);
+    _addDeal(_id, _price, _expiry, _sessionPublicKey);
 
     globalDealId++;
     emit LogDealCreated(_id, msg.sender, _expiryTime, _sessionPublicKey);
@@ -44,9 +38,10 @@ contract DealInterface is SecKeyList, Payment {
     uint256 expiredTime,
     string sessionPublicKey
   ) {
-    require(deals[_dealId].id == _dealId);
-
     DealData storage _deal = deals[_dealId];
+
+    require(_deal.id == _dealId);
+
     return (
       _deal.bidder,
       _deal.price,

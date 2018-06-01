@@ -10,11 +10,14 @@ contract Payment is DealInfo {
   struct UserBalance {
     uint256 escrowLock;
     uint256 escrowUnlock;
+    bool exist;
   }
 
   bool balanceLock = false;
 
   mapping(address => UserBalance) userBalances;
+
+  address[] users;
 
   event LogDealPaid(uint256 _dealId, address _from, address[] _to);
 
@@ -77,7 +80,10 @@ contract Payment is DealInfo {
     balanceLock = true;
 
     for (uint256 _i = 0; _i < _userIds.length; ++_i) {
-      UserBalance storage _balance = userBalances[_userIds[_i]];
+      address _userAddr = _userIds[_i];
+      if (!_hasExisted(_userAddr)) _addUser(_userAddr);
+
+      UserBalance storage _balance = userBalances[_userAddr];
       _balance.escrowLock = _balance.escrowLock.add(_price);
       _amount = _amount.sub(_price);
     }
@@ -85,11 +91,31 @@ contract Payment is DealInfo {
     if (_amount >= 0) {
       UserBalance storage _bidderBalance = userBalances[msg.sender];
       _bidderBalance.escrowUnlock = _bidderBalance.escrowUnlock.add(_amount);
+      if (!_hasExisted(msg.sender)) _addUser(msg.sender);
     }
 
     emit LogDealPaid(_dealId, msg.sender, _userIds);
 
     balanceLock = false;
     return true;
+  }
+
+  function getTheNumberOfUsers() external view onlyOwner returns(uint256) {
+    return users.length;
+  }
+
+  function getUserAddress(uint256 _index) external view onlyOwner returns(address) {
+    require(_index < users.length);
+
+    return users[_index];
+  }
+
+  function _addUser(address _userID) internal {
+    users.push(_userId);
+    userBalances[_userId].exist = true;
+  }
+
+  function _hasExisted(address _userID) internal returns(bool) {
+    return (userBalances[_userId].exist);
   }
 }
