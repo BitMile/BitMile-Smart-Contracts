@@ -2,120 +2,86 @@ pragma solidity ^0.4.20;
 
 import 'zeppelin-solidity/contracts/math/SafeMath.sol';
 
+import './AccountSet.sol';
 import "../deal/DealInfo.sol";
+import "../token/BMCToken.sol";
 
 contract Payment is DealInfo {
   using SafeMath for uint256;
 
-  struct UserBalance {
-    uint256 escrowLock;
-    uint256 escrowUnlock;
-    bool exist;
-  }
-
-  bool balanceLock = false;
-
-  mapping(address => UserBalance) userBalances;
-
-  address[] users;
+  BMCToken token;
+  AccountSet public accountSet;
 
   event LogDealPaid(uint256 _dealId, address _from, address[] _to);
 
   event LogBalanceUnlocked(address _userId, uint256 _value);
 
-  function _unlockBalance(address _userId, uint256 _value) internal returns(bool) {
-    UserBalance storage _balance = userBalances[_userId];
+  function Payment(BMCToken _token)
+  public {
+    token = _token;
+    token.addToFreeChargeSet(this);
 
-    require(_balance.escrowLock >= _value);
-    require(balanceLock == false);
-
-    balanceLock = true;
-
-    _balance.escrowLock = _balance.escrowLock.sub(_value);
-    _balance.escrowUnlock = _balance.escrowUnlock.add(_value);
-
-    balanceLock = false;
-    emit LogBalanceUnlocked(_userId, _value);
-    return true;
+    accountSet = new AccountSet();
   }
 
-  function withdraw(uint256 _value) external returns(bool) {
-    UserBalance storage _balance = userBalances[msg.sender];
+  function _unlockBalance(address _addr, uint256 _value) onlyOwner internal {
+    require(accountSet.getBalance(_addr) >= _value);
 
-    require(_balance.escrowUnlock >= _value);
-    require(balanceLock == false);
+    accountSet.decreaseBalance(_addr, _value);
+    token.transfer(_addr, _value);
 
-    balanceLock = true;
-
-    _balance.escrowUnlock = _balance.escrowUnlock.sub(_value);
-    msg.sender.transfer(_value);
-
-    balanceLock = false;
-    return true;
+    emit LogBalanceUnlocked(_addr, _value);
   }
 
-  function getBalance(address _userId) public view returns(
-    uint256 _lockAmount,
-    uint256 _unlockAmount
-  ) {
-    return (
-      userBalances[_userId].escrowLock,
-      userBalances[_userId].escrowUnlock
-    );
+  function getBalance(address _addr) public view returns(uint256) {
+    return accountSet.getBalance(_addr);
   }
 
-  // send BMC from Consumer to all valid doc owners
-  function payForRequestKeys(uint256 _dealId, address[] _userIds) external payable returns(bool) {
-    DealData storage _deal = deals[_id];
+  function payForMyDeal(uint256 _dealId, address[] _addrs) external {
+    DealData storage _deal = deals[_dealId];
 
     require(!hasExpired(_dealId));
     require(_deal.bidder == msg.sender);
 
-    uint256 _price = _deal.price;
-    uint256 _amount = msg.value;
+    _ensureKeysPayment(_addrs.length, _deal.price);
 
-    require(msg.value >= _userIds.length.mul(_price));
-    require(balanceLock == false);
-
-    balanceLock = true;
-
-    for (uint256 _i = 0; _i < _userIds.length; ++_i) {
-      address _userAddr = _userIds[_i];
-      if (!_hasExisted(_userAddr)) _addUser(_userAddr);
-
-      UserBalance storage _balance = userBalances[_userAddr];
-      _balance.escrowLock = _balance.escrowLock.add(_price);
-      _amount = _amount.sub(_price);
+    for (uint256 _i = 0; _i < _addrs.length; _i++) {
+      accountSet.increaseBalance(_addrs[_i], _deal.price);
     }
 
-    if (_amount >= 0) {
-      UserBalance storage _bidderBalance = userBalances[msg.sender];
-      _bidderBalance.escrowUnlock = _bidderBalance.escrowUnlock.add(_amount);
-      if (!_hasExisted(msg.sender)) _addUser(msg.sender);
-    }
-
-    emit LogDealPaid(_dealId, msg.sender, _userIds);
-
-    balanceLock = false;
-    return true;
+    emit LogDealPaid(_dealId, msg.sender, _addrs);
   }
 
-  function getTheNumberOfUsers() external view onlyOwner returns(uint256) {
-    return users.length;
+  function payForUserDeal(uint256 _dealId) external {
+    DealData storage _deal = deals[_dealId];
+
+    require(!hasExpired(_dealId));
+
+    _ensureKeysPayment(1, _deal.price);
+
+    accountSet.increaseBalance(_deal.bidder, _deal.price);
+
+    address[] memory _addrs = new address[](1);
+    _addrs[0] = _deal.bidder;
+    emit LogDealPaid(_dealId, msg.sender, _addrs);
   }
 
-  function getUserAddress(uint256 _index) external view onlyOwner returns(address) {
-    require(_index < users.length);
-
-    return users[_index];
+  function getTheNumberOfAccounts() onlyOwner external view returns(uint256) {
+    return accountSet.getTheNumberOfElements();
   }
 
-  function _addUser(address _userID) internal {
-    users.push(_userId);
-    userBalances[_userId].exist = true;
+  function getAccount(uint256 _index) onlyOwner external view returns(address, uint256) {
+    address _addr = accountSet.elementAt(_index);
+    return(_addr, accountSet.getBalance(_addr));
   }
 
-  function _hasExisted(address _userID) internal returns(bool) {
-    return (userBalances[_userId].exist);
+  function _ensureKeysPayment(uint256 _nUsers, uint256 _price) internal {
+    uint256 _allowed = token.allowance(msg.sender, this);
+    uint256 _transferValue = _price.mul(_nUsers);
+    uint256 _estimate = token.estimateTransferDebit(_transferValue);
+
+    require(_allowed >= _estimate);
+
+    token.transferFrom(msg.sender, this, _transferValue);
   }
 }

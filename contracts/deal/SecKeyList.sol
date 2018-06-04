@@ -2,7 +2,6 @@ pragma solidity ^0.4.20;
 
 
 import "./DealInfo.sol";
-import "../ownership/Ownable.sol";
 
 contract SecKeyList is DealInfo {
   struct SecKey {

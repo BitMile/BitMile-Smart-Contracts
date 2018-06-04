@@ -3,6 +3,7 @@ pragma solidity ^0.4.20;
 
 import "./deal/SecKeyList.sol";
 import "./payment/Payment.sol";
+import "./token/BMCToken.sol";
 
 contract DealInterface is SecKeyList, Payment {
   using SafeMath for uint256;
@@ -16,6 +17,11 @@ contract DealInterface is SecKeyList, Payment {
     string _sessionPublicKey
   );
 
+  function DealInterface(BMCToken _token)
+  Payment(_token)
+  public {
+  }
+
   function createDeal(
     uint256 _price,
     uint256 _expiryTimeAfter,
@@ -25,7 +31,7 @@ contract DealInterface is SecKeyList, Payment {
 
     uint256 _id = globalDealId;
     uint256 _expiryTime = _expiryTimeAfter.add(block.timestamp);
-    _addDeal(_id, _price, _expiry, _sessionPublicKey);
+    _addDeal(_id, _price, _expiryTime, _sessionPublicKey);
 
     globalDealId++;
     emit LogDealCreated(_id, msg.sender, _expiryTime, _sessionPublicKey);
