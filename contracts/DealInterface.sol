@@ -1,6 +1,7 @@
 pragma solidity ^0.4.20;
 
 
+import 'zeppelin-solidity/contracts/lifecycle/Pausable.sol';
 import 'zeppelin-solidity/contracts/math/SafeMath.sol';
 
 import "./deal/DealInfo.sol";
@@ -8,7 +9,7 @@ import "./deal/SecKeyList.sol";
 import "./payment/Payment.sol";
 import "./token/BMCToken.sol";
 
-contract DealInterface is DealInfo, SecKeyList, Payment {
+contract DealInterface is DealInfo, SecKeyList, Payment, Pausable {
   using SafeMath for uint256;
 
   uint256 public globalDealId = 1;
@@ -31,7 +32,7 @@ contract DealInterface is DealInfo, SecKeyList, Payment {
     uint256 _price,
     uint256 _expiryTimeAfter,
     string _sessionPublicKey
-  ) external {
+  ) external whenNotPaused {
     require(_expiryTimeAfter > 0);
 
     uint256 _id = globalDealId;
@@ -52,7 +53,7 @@ contract DealInterface is DealInfo, SecKeyList, Payment {
     return _getDeal(_dealId);
   }
 
-  function payForMyDeal(uint256 _dealId, address[] _addrs) external {
+  function payForMyDeal(uint256 _dealId, address[] _addrs) external whenNotPaused {
     DealData storage _deal = deals[_dealId];
 
     require(_addrs.length > 0);
@@ -65,7 +66,7 @@ contract DealInterface is DealInfo, SecKeyList, Payment {
     emit LogDealPaid(_dealId, msg.sender, _addrs);
   }
 
-  function payForUserDeal(uint256 _dealId) external {
+  function payForUserDeal(uint256 _dealId) external whenNotPaused {
     DealData storage _deal = deals[_dealId];
 
     require(!hasExpired(_dealId));
@@ -84,7 +85,7 @@ contract DealInterface is DealInfo, SecKeyList, Payment {
     string _encDocId,
     string _encSecKey,
     string _encDocNonce
-  ) external onlyOwner {
+  ) external onlyOwner whenNotPaused {
     DealData storage _deal = deals[_dealId];
 
     require(_deal.id == _dealId);
@@ -112,7 +113,7 @@ contract DealInterface is DealInfo, SecKeyList, Payment {
     return _getTheNumberOfSecKeys(_dealId);
   }
 
-  function deleteDeal(uint256 _dealId) external {
+  function deleteDeal(uint256 _dealId) external whenNotPaused {
     require(deals[_dealId].bidder == msg.sender);
 
     _deleteDeal(_dealId);

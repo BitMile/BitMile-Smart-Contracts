@@ -40,7 +40,7 @@ contract BMCToken is HasNoTokens, TraceableToken, PausableToken, ClaimableEx {
    * @param _to Who got the tokens.
    * @param _amount Amount of tokens.
    */
-  function mint(address _to, uint256 _amount) onlyOwner canMint public returns(bool) {
+  function mint(address _to, uint256 _amount) onlyOwner canMint whenNotPaused public returns(bool) {
     require(totalSupply_.add(_amount) <= TOTAL_TOKENS);
     return super.mint(_to, _amount);
   }
