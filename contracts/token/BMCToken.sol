@@ -1,7 +1,6 @@
 pragma solidity ^0.4.20;
 
 import 'zeppelin-solidity/contracts/math/SafeMath.sol';
-import 'zeppelin-solidity/contracts/ownership/Contactable.sol';
 import 'zeppelin-solidity/contracts/ownership/HasNoTokens.sol';
 import 'zeppelin-solidity/contracts/token/ERC20/MintableToken.sol';
 import 'zeppelin-solidity/contracts/token/ERC20/PausableToken.sol';
@@ -21,7 +20,7 @@ import '../utils/AddressSet.sol';
  *  - attempts to reject ERC20 token transfers to itself and allows token transfer out.
  *  - allows the new owner to accept the ownership transfer, the owner can cancel the transfer if needed.
  **/
-contract BMCToken is Contactable, HasNoTokens, MintableToken, PausableToken, ClaimableEx {
+contract BMCToken is HasNoTokens, MintableToken, PausableToken, ClaimableEx {
   using SafeMath for uint256;
 
   string public constant name = "BMCToken";
@@ -43,14 +42,11 @@ contract BMCToken is Contactable, HasNoTokens, MintableToken, PausableToken, Cla
    * @param _transferFeeRate Transfer fee rate.
    */
   function BMCToken(address _bitmileWallet, uint8 _transferFeeRate)
-  Contactable()
   HasNoTokens()
   MintableToken()
   PausableToken()
   ClaimableEx()
   public {
-    contactInformation = 'https://token.samuraix.io/';
-
     require(_bitmileWallet != 0x0);
     bitmileWallet = _bitmileWallet;
 
