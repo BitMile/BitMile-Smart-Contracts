@@ -34,13 +34,13 @@ contract DealInfo is ClaimableEx {
     return dealIds[_index];
   }
 
-  function _addDeal(uint256 _id, uint256 _price, uint256 _expiryTime, string _sessionPublicKey) internal {
+  function _addDeal(uint256 _id, address _bidder, uint256 _price, uint256 _expiryTime, string _sessionPublicKey) internal {
     DealData storage _deal = deals[_id];
 
     require(_deal.id == 0);
 
     _deal.id = _id;
-    _deal.bidder = msg.sender;
+    _deal.bidder = _bidder;
     _deal.price = _price;
     _deal.expiryTime = _expiryTime;
     _deal.sessionPublicKey = _sessionPublicKey;

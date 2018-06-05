@@ -29,6 +29,7 @@ contract DealInterface is DealInfo, SecKeyList, Payment, Pausable {
   }
 
   function createDeal(
+    address _bidder,
     uint256 _price,
     uint256 _expiryTimeAfter,
     string _sessionPublicKey
@@ -37,7 +38,7 @@ contract DealInterface is DealInfo, SecKeyList, Payment, Pausable {
 
     uint256 _id = globalDealId;
     uint256 _expiryTime = _expiryTimeAfter.add(block.timestamp);
-    _addDeal(_id, _price, _expiryTime, _sessionPublicKey);
+    _addDeal(_id, _bidder, _price, _expiryTime, _sessionPublicKey);
 
     globalDealId++;
     emit LogDealCreated(_id, msg.sender, _expiryTime, _sessionPublicKey);
@@ -114,7 +115,7 @@ contract DealInterface is DealInfo, SecKeyList, Payment, Pausable {
   }
 
   function deleteDeal(uint256 _dealId) external whenNotPaused {
-    require(deals[_dealId].bidder == msg.sender);
+    require(owner == msg.sender || deals[_dealId].bidder == msg.sender);
 
     _deleteDeal(_dealId);
     _clearSecKeys(_dealId);
