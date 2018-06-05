@@ -41,7 +41,7 @@ contract DealInterface is DealInfo, SecKeyList, Payment, Pausable {
     _addDeal(_id, _bidder, _price, _expiryTime, _sessionPublicKey);
 
     globalDealId++;
-    emit LogDealCreated(_id, msg.sender, _expiryTime, _sessionPublicKey);
+    emit LogDealCreated(_id, _bidder, _expiryTime, _sessionPublicKey);
   }
 
   // get information of a Deal
