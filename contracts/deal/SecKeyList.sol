@@ -1,13 +1,13 @@
 pragma solidity ^0.4.20;
 
 
-import "./DealInfo.sol";
+import "../ownership/ClaimableEx.sol";
 
-contract SecKeyList is DealInfo {
+contract SecKeyList is ClaimableEx {
   struct SecKey {
     address userId;
     string encDocId;
-    string secEncKey;
+    string encSecKey;
     string encDocNonce;
   }
 
@@ -18,51 +18,40 @@ contract SecKeyList is DealInfo {
     uint256 _dealId,
     address _userId,
     string _encDocId,
-    string _secEncKey,
+    string _encSecKey,
     string _encDocNonce
   ) internal onlyOwner {
-    DealData storage _deal = deals[_dealId];
-
-    require(_deal.id == _dealId);
-
     SecKey memory _key;
     _key.userId = _userId;
     _key.encDocId = _encDocId;
-    _key.secEncKey = _secEncKey;
+    _key.encSecKey = _encSecKey;
     _key.encDocNonce = _encDocNonce;
 
     secKeys[_dealId].push(_key);
   }
 
-  function getSecKey(uint256 _dealId, uint256 _index) public view returns(
-    address ownerId,
-    string encDocId,
-    string secEncKey,
-    string encDocNonce
+  function _getSecKey(uint256 _dealId, uint256 _index) internal view returns(
+    address _userId,
+    string _encDocId,
+    string _encSecKey,
+    string _encDocNonce
   ) {
-    DealData storage _deal = deals[_dealId];
-
-    require(_deal.bidder == msg.sender);
     require(_index <= secKeys[_dealId].length);
 
     SecKey memory _key = secKeys[_dealId][_index];
     return (
       _key.userId,
       _key.encDocId,
-      _key.secEncKey,
+      _key.encSecKey,
       _key.encDocNonce
     );
   }
 
-  function getTheNumberOfSecKeys(uint256 _dealId) public view returns(uint256) {
-    require(deals[_dealId].id == _dealId);
-
+  function _getTheNumberOfSecKeys(uint256 _dealId) internal view returns(uint256) {
     return secKeys[_dealId].length;
   }
 
   function _clearSecKeys(uint256 _dealId) internal {
-    require(deals[_dealId].bidder == msg.sender);
-
     delete secKeys[_dealId];
   }
 }

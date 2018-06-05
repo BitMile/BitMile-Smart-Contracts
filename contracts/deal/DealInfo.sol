@@ -1,12 +1,8 @@
 pragma solidity ^0.4.20;
 
-import 'zeppelin-solidity/contracts/math/SafeMath.sol';
-
 import "../ownership/ClaimableEx.sol";
 
 contract DealInfo is ClaimableEx {
-  using SafeMath for uint256;
-
   struct DealData {
     uint256 id;
     address bidder;
@@ -17,6 +13,9 @@ contract DealInfo is ClaimableEx {
 
   // dealId => DealData
   mapping(uint256 => DealData) deals;
+
+  // dealId => payer
+  mapping(uint256 => address) payers;
 
   uint256[] dealIds;
 
@@ -47,5 +46,35 @@ contract DealInfo is ClaimableEx {
     _deal.sessionPublicKey = _sessionPublicKey;
 
     dealIds.push(_id);
+  }
+
+  function _deleteDeal(uint256 _dealId) internal {
+    require(deals[_dealId].id == _dealId);
+    require(hasExpired(_dealId));
+
+    delete deals[_dealId];
+  }
+
+  function _getDeal(uint256 _dealId) internal view returns(
+    address _bidder,
+    uint256 _price,
+    uint256 _expiryTime,
+    string _sessionPublicKey
+  ) {
+    DealData storage _deal = deals[_dealId];
+
+    require(_deal.id == _dealId);
+
+    return (_deal.bidder, _deal.price, _deal.expiryTime, _deal.sessionPublicKey);
+  }
+
+  function _addPayer(uint256 _dealId) internal {
+    require(payers[_dealId] == 0x0);
+
+    payers[_dealId] == msg.sender;
+  }
+
+  function _isPayer(uint256 _dealId) internal view returns(bool) {
+    return payers[_dealId] == msg.sender;
   }
 }
