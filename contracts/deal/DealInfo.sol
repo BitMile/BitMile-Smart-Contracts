@@ -71,7 +71,7 @@ contract DealInfo is ClaimableEx {
   function _addPayer(uint256 _dealId) internal {
     require(payers[_dealId] == 0x0);
 
-    payers[_dealId] == msg.sender;
+    payers[_dealId] = msg.sender;
   }
 
   function _isPayer(uint256 _dealId) internal view returns(bool) {
