@@ -8,8 +8,8 @@ import './TraceableToken.sol';
 
 
 /**
- * @title BMC token.
- * @dev BMC is a ERC20 token that:
+ * @title XBM token.
+ * @dev XBM is a ERC20 token that:
  *  - caps total number at 10 billion tokens.
  *  - can pause and unpause token transfer (and authorization) actions.
  *  - mints new tokens when purchased.
@@ -17,16 +17,16 @@ import './TraceableToken.sol';
  *  - attempts to reject ERC20 token transfers to itself and allows token transfer out.
  *  - allows the new owner to accept the ownership transfer, the owner can cancel the transfer if needed.
  **/
-contract BMCToken is HasNoTokens, TraceableToken, PausableToken, ClaimableEx {
-  string public constant name = "BMCToken";
-  string public constant symbol = "BMC";
+contract XBMToken is HasNoTokens, TraceableToken, PausableToken, ClaimableEx {
+  string public constant name = "XBMToken";
+  string public constant symbol = "XBM";
 
   uint8 public constant decimals = 18;
   uint256 public constant ONE_TOKENS = (10 ** uint256(decimals));
   uint256 public constant BILLION_TOKENS = (10**9) * ONE_TOKENS;
   uint256 public constant TOTAL_TOKENS = 10 * BILLION_TOKENS;
 
-  function BMCToken()
+  function XBMToken()
   HasNoTokens()
   TraceableToken()
   PausableToken()
