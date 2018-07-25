@@ -35,7 +35,10 @@ contract DealInterface is DealInfo, SecKeyList, Payment, Pausable {
     uint256 _price,
     uint256 _expiryTimeAfter,
     string _sessionPublicKey
-  ) external whenNotPaused {
+  )
+    external
+    whenNotPaused
+  {
     require(_expiryTimeAfter > 0);
 
     uint256 _id = globalDealId;
@@ -48,16 +51,28 @@ contract DealInterface is DealInfo, SecKeyList, Payment, Pausable {
   }
 
   // get information of a Deal
-  function getDeal(uint256 _dealId) external view returns(
-    address _bidder,
-    uint256 _price,
-    uint256 _expiryTime,
-    string _sessionPublicKey
-  ) {
+  function getDeal(
+    uint256 _dealId
+  )
+    external
+    view
+    returns (
+      address _bidder,
+      uint256 _price,
+      uint256 _expiryTime,
+      string _sessionPublicKey
+    )
+  {
     return _getDeal(_dealId);
   }
 
-  function payForMyDeal(uint256 _dealId, address[] _addrs) external whenNotPaused {
+  function payForMyDeal(
+    uint256 _dealId,
+    address[] _addrs
+  )
+    external
+    whenNotPaused
+  {
     DealData storage _deal = deals[_dealId];
 
     require(_addrs.length > 0);
@@ -89,7 +104,11 @@ contract DealInterface is DealInfo, SecKeyList, Payment, Pausable {
     string _encDocId,
     string _encSecKey,
     string _encDocNonce
-  ) external onlyOwner whenNotPaused {
+  )
+    external
+    onlyOwner
+    whenNotPaused
+  {
     DealData storage _deal = deals[_dealId];
 
     require(_deal.id == _dealId);
@@ -100,18 +119,31 @@ contract DealInterface is DealInfo, SecKeyList, Payment, Pausable {
     _unlockBalance(_userId, _deal.price);
   }
 
-  function getSecKey(uint256 _dealId, uint256 _index) external view returns(
-    address _userId,
-    string _encDocId,
-    string _encSecKey,
-    string _encDocNonce
-  ) {
+  function getSecKey(
+    uint256 _dealId,
+    uint256 _index
+  )
+    external
+    view
+    returns (
+      address _userId,
+      string _encDocId,
+      string _encSecKey,
+      string _encDocNonce
+    )
+  {
     require(owner == msg.sender || _isPayer(_dealId));
 
     return _getSecKey(_dealId, _index);
   }
 
-  function getTheNumberOfSecKeys(uint256 _dealId) external view returns(uint256) {
+  function getTheNumberOfSecKeys(
+    uint256 _dealId
+  )
+    external
+    view
+    returns(uint256)
+  {
     require(owner == msg.sender || _isPayer(_dealId));
 
     return _getTheNumberOfSecKeys(_dealId);

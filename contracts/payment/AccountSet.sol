@@ -4,6 +4,7 @@ import '../zeppelin/contracts/math/SafeMath.sol';
 
 import '../utils/AddressSet.sol';
 
+
 /**
  * @title Account Set.
  * @dev This contract allows to store accounts in a set and
@@ -14,7 +15,7 @@ contract AccountSet is AddressSet {
 
   mapping(address => uint256) balances;
 
-  function getBalance(address _addr) public view returns(uint256) {
+  function getBalance(address _addr) public view returns (uint256) {
     return balances[_addr];
   }
 

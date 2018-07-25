@@ -2,6 +2,7 @@ pragma solidity ^0.4.24;
 
 import "../ownership/ClaimableEx.sol";
 
+
 contract DealInfo is ClaimableEx {
   struct DealData {
     uint256 id;
@@ -19,22 +20,30 @@ contract DealInfo is ClaimableEx {
 
   uint256[] dealIds;
 
-  function hasExpired(uint256 _dealId) public view returns(bool) {
+  function hasExpired(uint256 _dealId) public view returns (bool) {
     DealData storage _deal = deals[_dealId];
     return block.timestamp > _deal.expiryTime;
   }
 
-  function getTheNumberOfDeals() external view onlyOwner returns(uint256) {
+  function getTheNumberOfDeals() external view onlyOwner returns (uint256) {
     return dealIds.length;
   }
 
-  function getDealId(uint256 _index) external view onlyOwner returns(uint256) {
+  function getDealId(uint256 _index) external view onlyOwner returns (uint256) {
     require(_index < dealIds.length);
 
     return dealIds[_index];
   }
 
-  function _addDeal(uint256 _id, address _bidder, uint256 _price, uint256 _expiryTime, string _sessionPublicKey) internal {
+  function _addDeal(
+    uint256 _id,
+    address _bidder,
+    uint256 _price,
+    uint256 _expiryTime,
+    string _sessionPublicKey
+  )
+    internal
+  {
     DealData storage _deal = deals[_id];
 
     require(_deal.id == 0);
@@ -55,12 +64,18 @@ contract DealInfo is ClaimableEx {
     delete deals[_dealId];
   }
 
-  function _getDeal(uint256 _dealId) internal view returns(
-    address _bidder,
-    uint256 _price,
-    uint256 _expiryTime,
-    string _sessionPublicKey
-  ) {
+  function _getDeal(
+    uint256 _dealId
+  )
+    internal
+    view
+    returns (
+      address _bidder,
+      uint256 _price,
+      uint256 _expiryTime,
+      string _sessionPublicKey
+    )
+  {
     DealData storage _deal = deals[_dealId];
 
     require(_deal.id == _dealId);
@@ -74,7 +89,7 @@ contract DealInfo is ClaimableEx {
     payers[_dealId] = msg.sender;
   }
 
-  function _isPayer(uint256 _dealId) internal view returns(bool) {
+  function _isPayer(uint256 _dealId) internal view returns (bool) {
     return payers[_dealId] == msg.sender;
   }
 }

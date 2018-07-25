@@ -1,11 +1,11 @@
 pragma solidity ^0.4.24;
 
-
 import '../zeppelin/contracts/math/SafeMath.sol';
 
 import './AccountSet.sol';
 import "../ownership/ClaimableEx.sol";
 import "../token/private/XBMToken.sol";
+
 
 contract Payment is ClaimableEx {
   using SafeMath for uint256;
@@ -15,22 +15,28 @@ contract Payment is ClaimableEx {
 
   event LogBalanceUnlocked(address _userId, uint256 _value);
 
-  function Payment(XBMToken _token)
-  public {
+  constructor(XBMToken _token) public {
     token = _token;
 
     accountSet = new AccountSet();
   }
 
-  function getBalance(address _addr) public view returns(uint256) {
+  function getBalance(address _addr) public view returns (uint256) {
     return accountSet.getBalance(_addr);
   }
 
-  function getTheNumberOfAccounts() onlyOwner external view returns(uint256) {
+  function getTheNumberOfAccounts() onlyOwner external view returns (uint256) {
     return accountSet.getTheNumberOfElements();
   }
 
-  function getAccount(uint256 _index) onlyOwner external view returns(address, uint256) {
+  function getAccount(
+    uint256 _index
+  )
+    onlyOwner
+    external
+    view
+    returns (address, uint256)
+  {
     address _addr = accountSet.elementAt(_index);
     return(_addr, accountSet.getBalance(_addr));
   }

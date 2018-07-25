@@ -2,6 +2,7 @@ pragma solidity ^0.4.24;
 
 import "../zeppelin/contracts/ownership/Ownable.sol";
 
+
 /**
  * @title Address Set.
  * @dev This contract allows to store addresses in a set and
@@ -16,7 +17,7 @@ contract AddressSet is Ownable {
    * @param _addr Address to add.
    * @return True if succeed, otherwise false.
    */
-  function add(address _addr) onlyOwner public returns(bool) {
+  function add(address _addr) onlyOwner public returns (bool) {
     if (contains(_addr)) {
       return false;
     }
@@ -31,7 +32,7 @@ contract AddressSet is Ownable {
    * @param _addr Address to check.
    * @return True if the address exists in the set, otherwise false.
    */
-  function contains(address _addr) public view returns(bool) {
+  function contains(address _addr) public view returns (bool) {
     return exist[_addr];
   }
 
@@ -40,7 +41,7 @@ contract AddressSet is Ownable {
    * @param _index Index.
    * @return A relevant address.
    */
-  function elementAt(uint256 _index) onlyOwner public view returns(address) {
+  function elementAt(uint256 _index) onlyOwner public view returns (address) {
     require(_index < elements.length);
 
     return elements[_index];
@@ -50,7 +51,7 @@ contract AddressSet is Ownable {
    * @dev Gets the number of elements in the set.
    * @return The number of elements.
    */
-  function getTheNumberOfElements() onlyOwner public view returns(uint256) {
+  function getTheNumberOfElements() onlyOwner public view returns (uint256) {
     return elements.length;
   }
 }

@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
-
 import "../ownership/ClaimableEx.sol";
+
 
 contract SecKeyList is ClaimableEx {
   struct SecKey {
@@ -20,7 +20,10 @@ contract SecKeyList is ClaimableEx {
     string _encDocId,
     string _encSecKey,
     string _encDocNonce
-  ) internal onlyOwner {
+  )
+    internal
+    onlyOwner
+  {
     SecKey memory _key;
     _key.userId = _userId;
     _key.encDocId = _encDocId;
@@ -30,12 +33,19 @@ contract SecKeyList is ClaimableEx {
     secKeys[_dealId].push(_key);
   }
 
-  function _getSecKey(uint256 _dealId, uint256 _index) internal view returns(
-    address _userId,
-    string _encDocId,
-    string _encSecKey,
-    string _encDocNonce
-  ) {
+  function _getSecKey(
+    uint256 _dealId,
+    uint256 _index
+  )
+    internal
+    view
+    returns (
+      address _userId,
+      string _encDocId,
+      string _encSecKey,
+      string _encDocNonce
+    )
+  {
     require(_index <= secKeys[_dealId].length);
 
     SecKey memory _key = secKeys[_dealId][_index];
@@ -47,7 +57,13 @@ contract SecKeyList is ClaimableEx {
     );
   }
 
-  function _getTheNumberOfSecKeys(uint256 _dealId) internal view returns(uint256) {
+  function _getTheNumberOfSecKeys(
+    uint256 _dealId
+  )
+    internal
+    view
+    returns (uint256)
+  {
     return secKeys[_dealId].length;
   }
 
