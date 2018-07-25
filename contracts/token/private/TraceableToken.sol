@@ -1,8 +1,8 @@
-pragma solidity ^0.4.20;
+pragma solidity ^0.4.24;
 
-import 'zeppelin-solidity/contracts/token/ERC20/MintableToken.sol';
+import '../../zeppelin/contracts/token/ERC20/MintableToken.sol';
 
-import '../utils/AddressSet.sol';
+import '../../utils/AddressSet.sol';
 
 /**
  * @title Traceable token.
@@ -11,38 +11,57 @@ import '../utils/AddressSet.sol';
 contract TraceableToken is MintableToken {
   AddressSet public holderSet;
 
+  constructor() public {
+    holderSet = new AddressSet();
+  }
+
   /**
    * @dev Mints tokens to a beneficiary address. The target address should be
    * added to the token holders list if needed.
    * @param _to Who got the tokens.
    * @param _amount Amount of tokens.
    */
-  function mint(address _to, uint256 _amount) onlyOwner canMint public returns(bool) {
+  function mint(
+    address _to,
+    uint256 _amount
+  )
+    hasMintPermission
+    canMint
+    public
+    returns (bool)
+  {
     bool suc = super.mint(_to, _amount);
     if (suc) holderSet.add(_to);
 
     return suc;
   }
 
-  function transfer(address _to, uint256 _value) public returns(bool) {
+  function transfer(address _to, uint256 _value) public returns (bool) {
     _checkTransferTarget(_to);
 
     super.transfer(_to, _value);
     return true;
   }
 
-  function transferFrom(address _from, address _to, uint256 _value) public returns(bool) {
+  function transferFrom(
+    address _from,
+    address _to,
+    uint256 _value
+  )
+    public
+    returns (bool)
+  {
     _checkTransferTarget(_to);
 
     super.transferFrom(_from, _to, _value);
     return true;
   }
 
-  function getTheNumberOfHolders() onlyOwner external view returns(uint256) {
+  function getTheNumberOfHolders() onlyOwner external view returns (uint256) {
     return holderSet.getTheNumberOfElements();
   }
 
-  function getHolder(uint256 _index) onlyOwner external view returns(address) {
+  function getHolder(uint256 _index) onlyOwner external view returns (address) {
     return holderSet.elementAt(_index);
   }
 

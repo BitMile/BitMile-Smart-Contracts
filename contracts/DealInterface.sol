@@ -1,13 +1,13 @@
-pragma solidity ^0.4.20;
+pragma solidity ^0.4.24;
 
-
-import 'zeppelin-solidity/contracts/lifecycle/Pausable.sol';
-import 'zeppelin-solidity/contracts/math/SafeMath.sol';
+import './zeppelin/contracts/lifecycle/Pausable.sol';
+import './zeppelin/contracts/math/SafeMath.sol';
 
 import "./deal/DealInfo.sol";
 import "./deal/SecKeyList.sol";
 import "./payment/Payment.sol";
-import "./token/BMCToken.sol";
+import "./token/private/XBMToken.sol";
+
 
 contract DealInterface is DealInfo, SecKeyList, Payment, Pausable {
   using SafeMath for uint256;
@@ -23,9 +23,12 @@ contract DealInterface is DealInfo, SecKeyList, Payment, Pausable {
 
   event LogDealPaid(uint256 _dealId, address _from, address[] _to);
 
-  function DealInterface(BMCToken _token)
-  Payment(_token)
-  public {
+  constructor(
+    XBMToken _token
+  )
+    public
+    Payment(_token)
+  {
   }
 
   function createDeal(

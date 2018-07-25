@@ -1,21 +1,21 @@
-pragma solidity ^0.4.20;
+pragma solidity ^0.4.24;
 
 
-import 'zeppelin-solidity/contracts/math/SafeMath.sol';
+import '../zeppelin/contracts/math/SafeMath.sol';
 
 import './AccountSet.sol';
 import "../ownership/ClaimableEx.sol";
-import "../token/BMCToken.sol";
+import "../token/private/XBMToken.sol";
 
 contract Payment is ClaimableEx {
   using SafeMath for uint256;
 
-  BMCToken token;
+  XBMToken token;
   AccountSet public accountSet;
 
   event LogBalanceUnlocked(address _userId, uint256 _value);
 
-  function Payment(BMCToken _token)
+  function Payment(XBMToken _token)
   public {
     token = _token;
 

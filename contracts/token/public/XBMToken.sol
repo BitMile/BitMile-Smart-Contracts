@@ -1,24 +1,25 @@
 pragma solidity ^0.4.24;
 
 import '../../zeppelin/contracts/ownership/Contactable.sol';
+import '../../zeppelin/contracts/ownership/HasNoEther.sol';
 import '../../zeppelin/contracts/ownership/HasNoTokens.sol';
+import '../../zeppelin/contracts/token/ERC20/MintableToken.sol';
 import '../../zeppelin/contracts/token/ERC20/PausableToken.sol';
 
 import '../../ownership/ClaimableEx.sol';
-import './TraceableToken.sol';
 
 
 /**
- * @title XBM private token.
+ * @title XBM public token.
  * @dev XBM is a ERC20 token that:
  *  - caps total number at 100 billion tokens.
  *  - can pause and unpause token transfer (and authorization) actions.
  *  - mints new tokens when purchased.
- *  - can run a loop through all token holders.
  *  - attempts to reject ERC20 token transfers to itself and allows token transfer out.
+ *  - attempts to reject ether sent and allows any ether held to be transferred out.
  *  - allows the new owner to accept the ownership transfer, the owner can cancel the transfer if needed.
  **/
-contract XBMToken is Contactable, ClaimableEx, HasNoTokens, PausableToken, TraceableToken {
+contract XBMToken is Contactable, HasNoEther, HasNoTokens, ClaimableEx, MintableToken, PausableToken {
   string public constant name = "XBMToken";
   string public constant symbol = "XBM";
 
@@ -28,11 +29,11 @@ contract XBMToken is Contactable, ClaimableEx, HasNoTokens, PausableToken, Trace
   constructor()
     public
     Contactable()
-    ClaimableEx()
+    HasNoEther()
     HasNoTokens()
-    PausableToken()
+    ClaimableEx()
     MintableToken()
-    TraceableToken()
+    PausableToken()
   {
     contactInformation = 'http://bitmile.io/';
   }

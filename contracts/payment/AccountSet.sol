@@ -1,6 +1,6 @@
-pragma solidity ^0.4.20;
+pragma solidity ^0.4.24;
 
-import 'zeppelin-solidity/contracts/math/SafeMath.sol';
+import '../zeppelin/contracts/math/SafeMath.sol';
 
 import '../utils/AddressSet.sol';
 
