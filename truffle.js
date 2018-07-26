@@ -7,7 +7,6 @@ module.exports = {
         main: {
             host: 'localhost',
             port: 8545,
-            from: '0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1',
             gasPrice: gwei(22),
             gas: '80000',
             network_id: 1
@@ -15,7 +14,6 @@ module.exports = {
         test: {
             host: 'localhost',
             port: 8545,
-            from: '0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1',
             gasPrice: gwei(2),
             gas: '80000',
             network_id: 4
