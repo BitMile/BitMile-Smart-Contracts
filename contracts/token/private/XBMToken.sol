@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
 import '../../zeppelin/contracts/ownership/Contactable.sol';
-import '../../zeppelin/contracts/ownership/HasNoTokens.sol';
+import '../../zeppelin/contracts/ownership/CanReclaimToken.sol';
 import '../../zeppelin/contracts/token/ERC20/PausableToken.sol';
 
 import '../../ownership/ClaimableEx.sol';
@@ -18,7 +18,7 @@ import './TraceableToken.sol';
  *  - attempts to reject ERC20 token transfers to itself and allows token transfer out.
  *  - allows the new owner to accept the ownership transfer, the owner can cancel the transfer if needed.
  **/
-contract XBMToken is Contactable, ClaimableEx, HasNoTokens, PausableToken, TraceableToken {
+contract XBMToken is Contactable, ClaimableEx, CanReclaimToken, PausableToken, TraceableToken {
   string public constant name = "XBMToken";
   string public constant symbol = "XBM";
 
@@ -29,7 +29,7 @@ contract XBMToken is Contactable, ClaimableEx, HasNoTokens, PausableToken, Trace
     public
     Contactable()
     ClaimableEx()
-    HasNoTokens()
+    CanReclaimToken()
     PausableToken()
     MintableToken()
     TraceableToken()
