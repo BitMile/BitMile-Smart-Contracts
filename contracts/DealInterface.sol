@@ -6,7 +6,7 @@ import './zeppelin/contracts/math/SafeMath.sol';
 import "./deal/DealInfo.sol";
 import "./deal/SecKeyList.sol";
 import "./payment/Payment.sol";
-import "./token/private/XBMToken.sol";
+import "./token/XBMToken.sol";
 
 
 contract DealInterface is DealInfo, SecKeyList, Payment, Pausable {

@@ -4,7 +4,7 @@ import '../zeppelin/contracts/math/SafeMath.sol';
 
 import './AccountSet.sol';
 import "../ownership/ClaimableEx.sol";
-import "../token/private/XBMToken.sol";
+import "../token/XBMToken.sol";
 
 
 contract Payment is ClaimableEx {

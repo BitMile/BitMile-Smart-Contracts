@@ -1,8 +1,8 @@
 pragma solidity ^0.4.24;
 
-import '../../zeppelin/contracts/token/ERC20/MintableToken.sol';
+import '../zeppelin/contracts/token/ERC20/MintableToken.sol';
 
-import '../../utils/AddressSet.sol';
+import '../utils/AddressSet.sol';
 
 /**
  * @title Traceable token.

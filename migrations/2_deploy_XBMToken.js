@@ -1,4 +1,4 @@
-const XBMToken = artifacts.require("./token/private/XBMToken.sol");
+const XBMToken = artifacts.require("./token/XBMToken.sol");
 
 module.exports = function(deployer, network) {
   let overwrite = true;
