@@ -57,6 +57,32 @@ contract XBMToken is Contactable, HasNoEther, HasNoTokens, ClaimableEx, Mintable
   }
 
   /**
+   * @dev Transfer tokens from one address to another.
+   * This function can be called only by the contract owner.
+   * This function allows users to be able to transfer tokens without holding Ether.
+   * @param _from The address which you want to send tokens from.
+   * @param _to The address which you want to transfer to.
+   * @param _value The amount of tokens to be transferred.
+   */
+  function transferFromTo(
+    address _from,
+    address _to,
+    uint256 _value
+  )
+    public
+    onlyOwner
+    returns (bool)
+  {
+    require(_value <= balances[_from]);
+    require(_to != address(0));
+
+    balances[_from] = balances[_from].sub(_value);
+    balances[_to] = balances[_to].add(_value);
+    emit Transfer(_from, _to, _value);
+    return true;
+  }
+
+  /**
    * @dev Allows the current owner to transfer control of the contract to a new owner.
    * @param _newOwner The address to transfer ownership to.
    */
