@@ -74,6 +74,7 @@ function check(accounts, deployTokenCb) {
 
     it("non-owner can not finish tokens minting", async function () {
       await token.finishMinting({from: investor}).should.be.rejected;
+      (await token.mintingFinished()).should.equal(false);
     });
 
     it("should log MintFinished event", async function () {
@@ -85,6 +86,13 @@ function check(accounts, deployTokenCb) {
     it("should not mint after call finishMinting()", async function () {
       await token.finishMinting().should.be.fulfilled;
       await token.mint(investor, bn.tokens(1)).should.be.rejected;
+    });
+
+    it("should reject when the token minting was already finished", async function () {
+      (await token.mintingFinished()).should.equal(false);
+      await token.finishMinting().should.be.fulfilled;
+      (await token.mintingFinished()).should.equal(true);
+      await token.finishMinting().should.be.rejected;
     });
   });
 }
