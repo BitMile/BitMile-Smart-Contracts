@@ -10,7 +10,7 @@ contract ClaimableEx is Claimable {
   /*
    * @dev Cancels the ownership transfer.
    */
-  function cancelOwnershipTransfer() onlyOwner public {
+  function cancelOwnershipTransfer() public onlyOwner {
     pendingOwner = owner;
   }
 }

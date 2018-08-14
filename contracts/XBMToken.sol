@@ -47,9 +47,9 @@ contract XBMToken is Contactable, HasNoEther, ClaimableEx, CanReclaimToken, Mint
     address _to,
     uint256 _amount
   )
+    public
     hasMintPermission
     canMint
-    public
     returns (bool)
   {
     require(totalSupply_.add(_amount) <= TOTAL_TOKENS);
@@ -60,7 +60,7 @@ contract XBMToken is Contactable, HasNoEther, ClaimableEx, CanReclaimToken, Mint
    * @dev Allows the current owner to transfer control of the contract to a new owner.
    * @param _newOwner The address to transfer ownership to.
    */
-  function transferOwnership(address _newOwner) onlyOwner public {
+  function transferOwnership(address _newOwner) public onlyOwner {
     // do not allow self ownership
     require(_newOwner != address(this));
     super.transferOwnership(_newOwner);
