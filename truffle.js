@@ -1,5 +1,3 @@
-require('babel-register');
-require('babel-polyfill');
 const gwei = n => (n*10**9).toString(10);
 
 module.exports = {
