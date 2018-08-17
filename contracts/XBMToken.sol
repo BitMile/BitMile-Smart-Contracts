@@ -1,5 +1,6 @@
 pragma solidity ^0.4.24;
 
+import './zeppelin/contracts/access/Whitelist.sol';
 import './zeppelin/contracts/ownership/Contactable.sol';
 import './zeppelin/contracts/ownership/HasNoEther.sol';
 import './zeppelin/contracts/ownership/HasNoTokens.sol';
@@ -19,7 +20,7 @@ import './ClaimableEx.sol';
  *  - attempts to reject ether sent and allows any ether held to be transferred out.
  *  - allows the new owner to accept the ownership transfer, the owner can cancel the transfer if needed.
  **/
-contract XBMToken is Contactable, HasNoEther, HasNoTokens, ClaimableEx, MintableToken, PausableToken {
+contract XBMToken is Contactable, HasNoEther, HasNoTokens, ClaimableEx, Whitelist, MintableToken, PausableToken {
   string public constant name = "XBMToken";
   string public constant symbol = "XBM";
 
@@ -32,10 +33,24 @@ contract XBMToken is Contactable, HasNoEther, HasNoTokens, ClaimableEx, Mintable
     HasNoEther()
     HasNoTokens()
     ClaimableEx()
+    Whitelist()
     MintableToken()
     PausableToken()
   {
     contactInformation = 'http://bitmile.io/';
+  }
+
+  function calcHash(
+    address _to,
+    uint256 _amount
+  )
+    public
+    pure
+    returns (bytes32)
+  {
+    return keccak256(
+      abi.encodePacked(_to, _amount)
+    );
   }
 
   /**
@@ -58,27 +73,36 @@ contract XBMToken is Contactable, HasNoEther, HasNoTokens, ClaimableEx, Mintable
 
   /**
    * @dev Transfer tokens from one address to another.
-   * This function can be called only by the contract owner.
+   * This function can be called only by some operator in the whitelist.
    * This function allows users to be able to transfer tokens without holding Ether.
-   * @param _from The address which you want to send tokens from.
+   * The sender user must pass his signature (v, r, s) on message (hash from calcHash())
+   * to the operator for the transaction can be validated.
    * @param _to The address which you want to transfer to.
-   * @param _value The amount of tokens to be transferred.
+   * @param _amount The amount of tokens to be transferred.
+   * @param _v v value of sender user's ECDSA signature.
+   * @param _r r value of sender user's ECDSA signature.
+   * @param _s s value of sender user's ECDSA signature.
    */
-  function transferFromTo(
-    address _from,
+  function transferTo(
     address _to,
-    uint256 _value
+    uint256 _amount,
+    uint8 _v,
+    bytes32 _r,
+    bytes32 _s
   )
     public
-    onlyOwner
+    onlyIfWhitelisted(msg.sender)
     returns (bool)
   {
-    require(_value <= balances[_from]);
     require(_to != address(0));
+    require(_amount > 0);
 
-    balances[_from] = balances[_from].sub(_value);
-    balances[_to] = balances[_to].add(_value);
-    emit Transfer(_from, _to, _value);
+    address _from = verify(_to, _amount, _v, _r, _s);
+    require(_amount <= balances[_from]);
+
+    balances[_from] = balances[_from].sub(_amount);
+    balances[_to] = balances[_to].add(_amount);
+    emit Transfer(_from, _to, _amount);
     return true;
   }
 
@@ -90,5 +114,28 @@ contract XBMToken is Contactable, HasNoEther, HasNoTokens, ClaimableEx, Mintable
     // do not allow self ownership
     require(_newOwner != address(this));
     super.transferOwnership(_newOwner);
+  }
+
+  function verify(
+    address _to,
+    uint256 _amount,
+    uint8 _v,
+    bytes32 _r,
+    bytes32 _s
+  )
+    public
+    pure
+    returns (address)
+  {
+    bytes memory _prefix = "\x19Ethereum Signed Message:\n32";
+    bytes32 _msg = calcHash(_to, _amount);
+    bytes32 _prefixedHash = keccak256(
+      abi.encodePacked(_prefix, _msg)
+    );
+
+    address _sender = ecrecover(_prefixedHash, _v, _r, _s);
+    require(_sender != address(0));
+
+    return _sender;
   }
 }
