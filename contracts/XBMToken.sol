@@ -4,23 +4,23 @@ import './zeppelin/contracts/access/Whitelist.sol';
 import './zeppelin/contracts/ownership/Contactable.sol';
 import './zeppelin/contracts/ownership/HasNoEther.sol';
 import './zeppelin/contracts/ownership/HasNoTokens.sol';
-import './zeppelin/contracts/token/ERC20/MintableToken.sol';
-import './zeppelin/contracts/token/ERC20/PausableToken.sol';
 
 import './ClaimableEx.sol';
+import './ERC223/ERC223MintableToken.sol';
+import './ERC223/ERC223PausableToken.sol';
 
 
 /**
  * @title XBM public token.
- * @dev XBM is a ERC20 token that:
+ * @dev XBM is a ERC223 token that:
  *  - caps total number at 100 billion tokens.
  *  - can pause and unpause token transfer (and authorization) actions.
  *  - mints new tokens when purchased.
- *  - attempts to reject ERC20 token transfers to itself and allows token transfer out.
+ *  - attempts to reject ERC20 and ERC223 token transfers to itself and allows token transfer out.
  *  - attempts to reject ether sent and allows any ether held to be transferred out.
  *  - allows the new owner to accept the ownership transfer, the owner can cancel the transfer if needed.
  **/
-contract XBMToken is Contactable, HasNoEther, HasNoTokens, ClaimableEx, Whitelist, MintableToken, PausableToken {
+contract XBMToken is Contactable, HasNoEther, HasNoTokens, ClaimableEx, Whitelist, ERC223MintableToken, ERC223PausableToken {
   string public constant name = "XBMToken";
   string public constant symbol = "XBM";
 
@@ -34,8 +34,8 @@ contract XBMToken is Contactable, HasNoEther, HasNoTokens, ClaimableEx, Whitelis
     HasNoTokens()
     ClaimableEx()
     Whitelist()
-    MintableToken()
-    PausableToken()
+    ERC223MintableToken()
+    ERC223PausableToken()
   {
     contactInformation = 'http://bitmile.io/';
   }
@@ -67,7 +67,7 @@ contract XBMToken is Contactable, HasNoEther, HasNoTokens, ClaimableEx, Whitelis
     canMint
     returns (bool)
   {
-    require(totalSupply_.add(_amount) <= TOTAL_TOKENS);
+    require(totalSupply().add(_amount) <= TOTAL_TOKENS);
     return super.mint(_to, _amount);
   }
 
@@ -92,18 +92,13 @@ contract XBMToken is Contactable, HasNoEther, HasNoTokens, ClaimableEx, Whitelis
   )
     public
     onlyIfWhitelisted(msg.sender)
+    whenNotPaused
     returns (bool)
   {
-    require(_to != address(0));
-    require(_amount > 0);
-
     address _from = verify(_to, _amount, _v, _r, _s);
-    require(_amount <= balances[_from]);
 
-    balances[_from] = balances[_from].sub(_amount);
-    balances[_to] = balances[_to].add(_amount);
-    emit Transfer(_from, _to, _amount);
-    return true;
+    bytes memory _empty;
+    return _transferFromTo(_from, _to, _amount, _empty);
   }
 
   /**
