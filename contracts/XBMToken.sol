@@ -95,7 +95,7 @@ contract XBMToken is Contactable, HasNoEther, HasNoTokens, ClaimableEx, Whitelis
     whenNotPaused
     returns (bool)
   {
-    address _from = verify(_to, _amount, _v, _r, _s);
+    address _from = _verify(_to, _amount, _v, _r, _s);
 
     bytes memory _empty;
     return _transferFromTo(_from, _to, _amount, _empty);
@@ -111,14 +111,14 @@ contract XBMToken is Contactable, HasNoEther, HasNoTokens, ClaimableEx, Whitelis
     super.transferOwnership(_newOwner);
   }
 
-  function verify(
+  function _verify(
     address _to,
     uint256 _amount,
     uint8 _v,
     bytes32 _r,
     bytes32 _s
   )
-    public
+    internal
     pure
     returns (address)
   {
