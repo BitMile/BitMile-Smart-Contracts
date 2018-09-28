@@ -10,7 +10,7 @@ import "./ERC223BasicToken.sol";
  * @dev Simple ERC223 Token example, with mintable token creation
  * Based on code by OpenZeppelin: https://github.com/OpenZeppelin/openzeppelin-solidity/blob/master/contracts/token/ERC20/MintableToken.sol
  */
-contract ERC223MintableToken is ERC223BasicToken, Ownable {
+contract ERC223MintableToken is ERC223BasicToken {
   event Mint(address indexed to, uint256 amount);
   event MintFinished();
 

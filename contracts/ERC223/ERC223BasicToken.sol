@@ -1,17 +1,19 @@
 pragma solidity ^0.4.24;
 
 import '../zeppelin/contracts/math/SafeMath.sol';
+import '../zeppelin/contracts/ownership/Ownable.sol';
 
 import './ERC223Basic.sol';
 import './ERC223Receiver.sol';
-
+import './BalanceSheet.sol';
 /**
  * @title Implementation of the ERC223 standard token.
  */
-contract ERC223BasicToken is ERC223Basic {
+contract ERC223BasicToken is ERC223Basic, Ownable {
   using SafeMath for uint256;
 
-  mapping (address => uint256) private balances;
+  BalanceSheet private _balances;
+  event BalanceSheetSet(address indexed sheet);
 
   uint256 private totalSupply_;
 
@@ -23,12 +25,23 @@ contract ERC223BasicToken is ERC223Basic {
   }
 
   /**
+   * @dev Claim ownership of the BalanceSheet contract
+   * @param _sheet The address of the BalanceSheet to claim.
+   */
+  function setBalanceSheet(address _sheet) public onlyOwner returns (bool) {
+    _balances = BalanceSheet(_sheet);
+    _balances.claimOwnership();
+    emit BalanceSheetSet(_sheet);
+    return true;
+  }
+
+  /**
   * @dev Gets the balance of the specified address.
   * @param _owner The address to query the the balance of.
   * @return An uint256 representing the amount owned by the passed address.
   */
   function balanceOf(address _owner) public view returns (uint256) {
-    return balances[_owner];
+    return _balances.balanceOf(_owner);
   }
 
   /**
@@ -100,7 +113,7 @@ contract ERC223BasicToken is ERC223Basic {
     require(_account != 0);
 
     totalSupply_ = totalSupply_.add(_amount);
-    balances[_account] = balances[_account].add(_amount);
+    _balances.addBalance(_account, _amount);
 
     bytes memory _empty;
     emit Transfer(address(0), _account, _amount, _empty);
@@ -128,11 +141,11 @@ contract ERC223BasicToken is ERC223Basic {
     returns (bool)
   {
     require(_value > 0);
-    require(_value <= balances[_from]);
+    require(_value <= _balances.balanceOf(_from));
     require(_to != address(0));
 
-    balances[_from] = balances[_from].sub(_value);
-    balances[_to] = balances[_to].add(_value);
+    _balances.subBalance(_from, _value);
+    _balances.addBalance(_to, _value);
     if (_isContract(_to)) {
       ERC223Receiver _receiver = ERC223Receiver(_to);
       _receiver.tokenFallback(_from, _value, _data);
