@@ -1,4 +1,5 @@
 const bn = require('./helpers/bignumber.js');
+const BalanceSheet = artifacts.require("./BalanceSheet.sol");
 
 const BigNumber = web3.BigNumber;
 
@@ -10,18 +11,23 @@ const should = require('chai')
 function check(accounts, deployContractCb, deployTokenCb) {
   var contractInstance;
   var token;
+  var balanceSheet;
   var owner = accounts[0];
   var investor = accounts[3];
   var purchaser = accounts[4];
-  var amount = bn.tokens(10**5);
+  var amount = bn.tokens(10**2);
 
   beforeEach(async function () {
     contractInstance = await deployContractCb();
     token = await deployTokenCb();
 
-    await token.mint(investor, amount).should.be.fulfilled;
-    // accident transfer
-    await token.transfer(contractInstance.address, amount, {from: investor}).should.be.fulfilled;
+    balanceSheet = await BalanceSheet.new({from:owner });
+    await balanceSheet.transferOwnership(token.address).should.be.fulfilled;
+    await token.setBalanceSheet(balanceSheet.address).should.be.fulfilled;
+    // accident
+    await token.mint(contractInstance.address, amount).should.be.fulfilled;
+    let accidentBalance = await token.balanceOf(contractInstance.address);
+    accidentBalance.should.be.bignumber.equal(amount);
   });
 
   it('should allow owner to reclaim tokens', async function() {

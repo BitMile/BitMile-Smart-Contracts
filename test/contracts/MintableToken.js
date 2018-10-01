@@ -1,4 +1,5 @@
 const BigNumber = web3.BigNumber;
+const BalanceSheet = artifacts.require("./BalanceSheet.sol");
 
 const should = require('chai')
   .use(require('chai-as-promised'))
@@ -11,13 +12,17 @@ function check(accounts, deployTokenCb) {
   var token;
   var owner = accounts[0];
   var investor = accounts[1];
+  var balanceSheet;
 
   beforeEach(async function () {
     token = await deployTokenCb();
+    balanceSheet = await BalanceSheet.new({from:owner });
+    await balanceSheet.transferOwnership(token.address).should.be.fulfilled;
+    await token.setBalanceSheet(balanceSheet.address).should.be.fulfilled;
   });
 
   describe('mint()', function() {
-    let amount = bn.tokens(75000);
+    let amount = bn.tokens(10**2);
     let from = '0x0000000000000000000000000000000000000000';
 
     it("begins with totalSupply", async function () {
