@@ -24,7 +24,7 @@ contract XBMToken is Contactable, HasNoEther, HasNoTokens, ClaimableEx, Whitelis
   string public constant name = "XBMToken";
   string public constant symbol = "XBM";
 
-  uint8 public constant decimals = 18;
+  uint8 public constant decimals = 9;
   uint256 public constant TOTAL_TOKENS = 100 * (10**9) * (10 ** uint256(decimals));
 
   constructor()
