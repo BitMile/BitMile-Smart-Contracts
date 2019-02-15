@@ -15,13 +15,13 @@ contract ERC223BasicToken is ERC223Basic, Ownable {
   BalanceSheet private _balances;
   event BalanceSheetSet(address indexed sheet);
 
-  uint256 private _totalSupply;
+  uint256 totalSupply_;
 
   /**
   * @dev Total number of tokens in existence
   */
   function totalSupply() public view returns (uint256) {
-    return _totalSupply;
+    return totalSupply_;
   }
 
   /**
@@ -33,6 +33,14 @@ contract ERC223BasicToken is ERC223Basic, Ownable {
     _balances.claimOwnership();
     emit BalanceSheetSet(_sheet);
     return true;
+  }
+
+  function getTheNumberOfHolders() public view returns (uint256) {
+    return _balances.getTheNumberOfHolders();
+  }
+
+  function getHolder(uint256 _index) public view returns (address) {
+    return _balances.getHolder(_index);
   }
 
   /**
@@ -112,7 +120,7 @@ contract ERC223BasicToken is ERC223Basic, Ownable {
   function _mint(address _account, uint256 _amount) internal {
     require(_account != 0);
 
-    _totalSupply = _totalSupply.add(_amount);
+    totalSupply_ = totalSupply_.add(_amount);
     _balances.addBalance(_account, _amount);
 
     bytes memory _empty;

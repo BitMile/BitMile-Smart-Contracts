@@ -81,6 +81,24 @@ function check(accounts, deployTokenCb) {
       balance1After.should.be.bignumber.equal(balance1Before);
     });
   });
+
+  describe('getTheNumberOfHolders()', function() {
+    it('Should return number of holders', async function() {
+      let _firstNumHol = await token.getTheNumberOfHolders().should.be.fulfilled;
+      await token.mint(investor, bn.tokens(1)).should.be.fulfilled;
+      let _secNumHol = await token.getTheNumberOfHolders().should.be.fulfilled;
+      _secNumHol.should.be.bignumber.equal(_firstNumHol.plus(1));
+    });
+  });
+
+  describe('getHolder()', function() {
+    it('Should allow get address via index', async function() {
+      await token.mint(investor, bn.tokens(1)).should.be.fulfilled;
+      let _numHol = await token.getTheNumberOfHolders().should.be.fulfilled;
+      let _holder = await token.getHolder(_numHol.minus(1)).should.be.fulfilled;
+      assert.equal(_holder, investor);
+    });
+  });
 }
 
 module.exports.check = check;
