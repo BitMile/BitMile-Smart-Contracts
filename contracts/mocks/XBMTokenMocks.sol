@@ -1,14 +1,14 @@
 pragma solidity ^0.4.24;
 
-import './zeppelin/contracts/access/Whitelist.sol';
-import './zeppelin/contracts/ownership/Contactable.sol';
-import './zeppelin/contracts/ownership/NoOwner.sol';
+import '../zeppelin/contracts/access/Whitelist.sol';
+import '../zeppelin/contracts/ownership/Contactable.sol';
+import '../zeppelin/contracts/ownership/NoOwner.sol';
 
-import './ClaimableEx.sol';
-import './ERC223/ERC223MintableToken.sol';
-import './ERC223/ERC223PausableToken.sol';
-import './delegate/CanDelegateToken.sol';
-import './delegate/DelegateToken.sol';
+import '../ClaimableEx.sol';
+import '../ERC223/ERC223MintableToken.sol';
+import '../ERC223/ERC223PausableToken.sol';
+import '../delegate/CanDelegateToken.sol';
+import '../delegate/DelegateToken.sol';
 
 /**
  * @title XBM public token.
@@ -20,14 +20,14 @@ import './delegate/DelegateToken.sol';
  *  - attempts to reject ether sent and allows any ether held to be transferred out.
  *  - allows the new owner to accept the ownership transfer, the owner can cancel the transfer if needed.
  **/
-contract XBMToken is Contactable, NoOwner, ClaimableEx, Whitelist, ERC223MintableToken, ERC223PausableToken, CanDelegateToken, DelegateToken {
+ contract XBMTokenMocks is Contactable, NoOwner, ClaimableEx, Whitelist, ERC223MintableToken, ERC223PausableToken, CanDelegateToken, DelegateToken {
   string public constant name = "XBMToken";
   string public constant symbol = "XBM";
 
   uint8 public constant decimals = 9;
   uint256 public constant TOTAL_TOKENS = 100 * (10**9) * (10 ** uint256(decimals));
 
-  constructor()
+  constructor(uint256 _totalSupply)
     public
     Contactable()
     NoOwner()
@@ -39,6 +39,7 @@ contract XBMToken is Contactable, NoOwner, ClaimableEx, Whitelist, ERC223Mintabl
     DelegateToken()
   {
     contactInformation = 'http://bitmile.io/';
+    totalSupply_ = _totalSupply;
   }
 
   function calcHash(

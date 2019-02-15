@@ -12,6 +12,8 @@ const reclaimTokens = require("./CanReclaimToken.js");
 const basicToken = require("./BasicToken.js");
 const pausableToken = require("./PausableToken.js");
 const mintableToken = require("./MintableToken.js");
+const delegateToken = require("./delegate/DelegateToken.js");
+const canDelegateToken = require("./delegate/CanDelegateToken.js");
 
 const XBMToken = artifacts.require("./XBMToken.sol");
 const BalanceSheet = artifacts.require("./BalanceSheet.sol");
@@ -167,6 +169,14 @@ contract('XBMToken', function (accounts) {
 
   describe('Basic Token', function() {
     basicToken.check(accounts, deploy);
+  });
+
+  describe('Delegate Token', function() {
+    delegateToken.check(accounts, deploy);
+  });
+
+  describe('Can Delegate Token', function() {
+    canDelegateToken.check(accounts, deploy);
   });
 
   describe('Pausable Token', function() {
