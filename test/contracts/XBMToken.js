@@ -49,6 +49,36 @@ contract('XBMToken', function (accounts) {
     v_decimal = web3.toDecimal(_v) + 27;
   });
 
+  describe('changeTokenName()', function() {
+    it('Should allow owner to set new name and symbol', async function() {
+      let _oldTokenName = await token.name();
+      let _oldTokenSymbol = await token.symbol();
+      let _newTokenName = "XBMToken_1";
+      let _newTokenSymbol = "XBM_1";
+      assert.notEqual(_oldTokenName, _newTokenName);
+      assert.notEqual(_oldTokenSymbol, _newTokenSymbol);
+
+      const {logs} = await token.changeTokenName(_newTokenName, _newTokenSymbol);
+      let _currName = await token.name();
+      let _currSymbol = await token.symbol();
+
+      assert.equal(_currName, _newTokenName);
+      assert.equal(_currSymbol, _newTokenSymbol);
+
+      // Should log event
+      const event = logs.find(e => e.event === 'ChangeTokenName');
+      event.should.exist;
+      (event.args.newName).should.equal(_newTokenName);
+      (event.args.newSymbol).should.equal(_newTokenSymbol);
+    });
+
+    it('Should reject non-owner to set new name and symbol', async function() {
+      let _newTokenName = "XBMToken_1";
+      let _newTokenSymbol = "XBM_1";
+      await token.changeTokenName(_newTokenName, _newTokenSymbol, {from: investor}).should.be.rejected;
+    });
+  });
+
   describe('transferTo()', function() {
     it('non-whitelistaddress can not call', async function () {
       await token.mint(investor, initAmount).should.be.fulfilled;

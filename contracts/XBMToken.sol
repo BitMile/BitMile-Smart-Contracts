@@ -21,11 +21,13 @@ import './delegate/DelegateToken.sol';
  *  - allows the new owner to accept the ownership transfer, the owner can cancel the transfer if needed.
  **/
 contract XBMToken is Contactable, NoOwner, ClaimableEx, Whitelist, ERC223MintableToken, ERC223PausableToken, CanDelegateToken, DelegateToken {
-  string public constant name = "XBMToken";
-  string public constant symbol = "XBM";
+  string public name = "XBMToken";
+  string public symbol = "XBM";
 
   uint8 public constant decimals = 9;
   uint256 public constant TOTAL_TOKENS = 100 * (10**9) * (10 ** uint256(decimals));
+
+  event ChangeTokenName(string newName, string newSymbol);
 
   constructor()
     public
@@ -39,6 +41,12 @@ contract XBMToken is Contactable, NoOwner, ClaimableEx, Whitelist, ERC223Mintabl
     DelegateToken()
   {
     contactInformation = 'http://bitmile.io/';
+  }
+
+  function changeTokenName(string _name, string _symbol) public onlyOwner {
+    name = _name;
+    symbol = _symbol;
+    emit ChangeTokenName(_name, _symbol);
   }
 
   function calcHash(
