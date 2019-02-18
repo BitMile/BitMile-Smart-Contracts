@@ -55,4 +55,17 @@ contract DelegateToken is ERC223BasicToken {
     bytes memory _empty;
     return _transferFromTo(_origSender, _to, _value, _empty);
   }
+
+  function delegateTransfer(
+    address _to,
+    uint256 _value,
+    bytes _data,
+    address _origSender
+  )
+    public
+    onlyMandator
+    returns (bool)
+  {
+    return _transferFromTo(_origSender, _to, _value, _data);
+  }
 }

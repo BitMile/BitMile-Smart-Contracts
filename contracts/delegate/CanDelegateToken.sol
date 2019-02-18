@@ -4,7 +4,7 @@ import "./DelegateToken.sol";
 
 
 // See DelegateToken.sol for more on the delegation system.
-contract CanDelegateToken is ERC223BasicToken{
+contract CanDelegateToken is ERC223BasicToken {
   // If this contract needs to be upgraded, the new contract will be stored
   // in 'delegate' and any BurnableToken calls to this contract will be delegated to that one.
   DelegateToken public delegate;
@@ -22,15 +22,21 @@ contract CanDelegateToken is ERC223BasicToken{
     emit DelegateToNewContract(delegate);
   }
 
-  // If a delegate has been designated, all ERC223 calls are forwarded to it
-  function transfer(address _to, uint256 _value) public returns (bool) {
+  function _transferFromTo(
+    address _from,
+    address _to,
+    uint256 _value,
+    bytes _data
+  )
+    internal
+    returns (bool)
+  {
     if (!_hasDelegate()) {
-      return super.transfer(_to, _value);
+      return super._transferFromTo(_from, _to, _value, _data);
     } else {
-      require(delegate.delegateTransfer(_to, _value, msg.sender));
+      require(delegate.delegateTransfer(_to, _value, _data, msg.sender));
       return true;
     }
-    return true;
   }
 
   function totalSupply() public view returns (uint256) {
